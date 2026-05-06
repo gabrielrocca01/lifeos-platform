@@ -1,0 +1,113 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'DASHBOARD.CIAO' | translate: {name: displayName()} }}</h1>
+      <p class="page-subtitle">{{ currentMonth }}</p>
+    </div>
+    <div class="year-selector">
+      @for (y of years; track y) {
+        <button class="year-btn" [class.active]="selectedYear === y" (click)="changeYear(y)">{{ y }}</button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-grid">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-card"></div> }
+    </div>
+    <div class="loading-grid" style="margin-top:12px">
+      @for (i of [1,2]; track i) { <div class="skeleton-card" style="height:260px"></div> }
+    </div>
+  } @else {
+
+    <!-- KPI -->
+    <div class="kpi-grid">
+      <div class="kpi-card accent">
+        <div class="kpi-label">{{ 'DASHBOARD.PATRIMONIO' | translate }}</div>
+        <div class="kpi-value">{{ totalBalance() | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+        <div class="kpi-sub">{{ 'DASHBOARD.CONTI' | translate: {n: accounts().length, tx: txCount(), year: selectedYear} }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">{{ 'DASHBOARD.ENTRATE' | translate: {year: selectedYear} }}</div>
+        <div class="kpi-value green">{{ yearIn() | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+        <div class="kpi-sub">{{ 'DASHBOARD.MESI' | translate: {n: monthlyFlow().length} }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">{{ 'DASHBOARD.USCITE' | translate: {year: selectedYear} }}</div>
+        <div class="kpi-value red">{{ yearOut() | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">{{ 'DASHBOARD.NETTO' | translate: {year: selectedYear} }}</div>
+        <div class="kpi-value" [class.green]="yearNet() >= 0" [class.red]="yearNet() < 0">
+          {{ yearNet() | currency:'EUR':'symbol':'1.2-2':'it' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- GRAFICI -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">{{ 'DASHBOARD.FLUSSO_MENSILE' | translate: {year: selectedYear} }}</div>
+        @if (monthlyFlow().length > 0) {
+          <div class="chart-wrap"><canvas #flowChart></canvas></div>
+        } @else {
+          <div class="chart-empty">{{ 'DASHBOARD.NO_DATI' | translate: {year: selectedYear} }}</div>
+        }
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">{{ 'DASHBOARD.ULTIME_CATEGORIE' | translate }}</div>
+        @if (recentTx().length > 0) {
+          <div class="chart-wrap"><canvas #catChart></canvas></div>
+        } @else {
+          <div class="chart-empty">{{ 'DASHBOARD.NO_TX' | translate }}</div>
+        }
+      </div>
+    </div>
+
+    <!-- CONTI -->
+    <div class="section-title">{{ 'DASHBOARD.SEZIONE_CONTI' | translate }}</div>
+    <div class="accounts-row">
+      @for (account of accounts(); track account.id) {
+        <div class="account-pill">
+          <div class="pill-stripe" [style.background]="account.color_tag"></div>
+          <div class="pill-body">
+            <div class="pill-name">{{ account.bank_name }}</div>
+            <div class="pill-balance">
+              {{ (account.balance_computed || account.balance) | currency:'EUR':'symbol':'1.0-0':'it' }}
+            </div>
+            <div class="pill-count" [class.empty]="account.transaction_count === 0">
+              {{ account.transaction_count > 0 ? account.transaction_count + ' tx' : ('DASHBOARD.NESSUN_IMPORT' | translate) }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- TRANSAZIONI RECENTI -->
+    <div class="section-title" style="margin-top:24px">{{ 'DASHBOARD.TRANSAZIONI_RECENTI' | translate }}</div>
+    @if (recentTx().length === 0) {
+      <div class="empty-state">{{ 'DASHBOARD.NO_TX_IMPORT' | translate }}</div>
+    } @else {
+      <div class="recent-list">
+        @for (tx of recentTx(); track tx.id) {
+          <div class="recent-row">
+            <div class="recent-dot" [style.background]="accountColor(tx.account_id)"></div>
+            <div class="recent-info">
+              <div class="recent-desc">{{ tx.description }}</div>
+              <div class="recent-meta">
+                {{ formatDate(tx.date) }} · {{ tx.bank_name ?? tx.account_id }}
+                @if (tx.category_name) { · {{ tx.category_icon }} {{ tx.category_name }} }
+              </div>
+            </div>
+            @if (tx.is_deductible) { <span class="badge-ded">det.</span> }
+            <div class="recent-amount" [class.in]="tx.direction === 'in'" [class.out]="tx.direction === 'out'">
+              {{ tx.direction === 'in' ? '+' : '−' }}{{ tx.amount | currency:'EUR':'symbol':'1.2-2':'it' }}
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  }
+</div>

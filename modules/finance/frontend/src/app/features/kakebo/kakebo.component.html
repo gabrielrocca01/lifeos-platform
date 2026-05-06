@@ -1,0 +1,188 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Kakebo</h1>
+      <p class="page-subtitle">Confronto kakebo fisico vs transazioni bancarie</p>
+    </div>
+    <div class="header-actions">
+      <label class="btn btn-ghost upload-btn" [class.loading]="importing()">
+        <input type="file" accept=".csv" hidden (change)="onCsvImport($event)" />
+        {{ importing() ? 'Importando...' : '↑ Carica CSV kakebo' }}
+      </label>
+      <button class="btn btn-ghost" (click)="showForm.set(!showForm())">+ Voce manuale</button>
+      <button class="btn btn-primary" (click)="reconcile()" [disabled]="reconciling() || entries().length === 0">
+        {{ reconciling() ? '↻ Riconciliazione...' : '⇄ Riconcilia' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- SELEZIONE MESE -->
+  <div class="month-bar">
+    @for (m of months; track m.key) {
+      <button class="month-btn" [class.active]="selectedMonth() === m.key" (click)="changeMonth(m.key)">
+        {{ m.label }}
+      </button>
+    }
+  </div>
+
+  <!-- KPI MESE -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Voci kakebo</div><div class="kpi-val">{{ entries().length }}</div></div>
+    <div class="kpi"><div class="kpi-label">Uscite</div><div class="kpi-val red">{{ totalOut() | currency:'EUR':'symbol':'1.2-2':'it' }}</div></div>
+    <div class="kpi"><div class="kpi-label">Entrate</div><div class="kpi-val green">{{ totalIn() | currency:'EUR':'symbol':'1.2-2':'it' }}</div></div>
+    <div class="kpi"><div class="kpi-label">Matchate</div><div class="kpi-val green">{{ matchedCount() }}</div></div>
+    <div class="kpi"><div class="kpi-label">In attesa</div><div class="kpi-val amber">{{ pendingCount() }}</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab" [class.active]="activeTab()==='entries'" (click)="activeTab.set('entries')">Voci</button>
+    <button class="tab" [class.active]="activeTab()==='reconcile'" (click)="activeTab.set('reconcile')">Riconciliazione</button>
+    <button class="tab" [class.active]="activeTab()==='history'" (click)="activeTab.set('history')">Storico</button>
+  </div>
+
+  <!-- FORM MANUALE -->
+  @if (showForm()) {
+    <div class="inline-form">
+      <input class="form-input sm" [(ngModel)]="form.date" type="date" />
+      <input class="form-input" [(ngModel)]="form.description" placeholder="Descrizione" style="flex:2" />
+      <input class="form-input sm" [(ngModel)]="form.amount" type="number" placeholder="Importo" />
+      <select class="form-input sm" [(ngModel)]="form.direction">
+        <option value="out">Uscita</option>
+        <option value="in">Entrata</option>
+      </select>
+      <input class="form-input sm" [(ngModel)]="form.account_hint" placeholder="Conto (es. revolut)" />
+      <label class="cash-check"><input type="checkbox" [(ngModel)]="form.is_cash" /> Contanti</label>
+      <button class="btn btn-primary" (click)="addEntry()">Aggiungi</button>
+      <button class="btn btn-ghost" (click)="showForm.set(false)">✕</button>
+    </div>
+  }
+
+  <!-- TAB VOCI -->
+  @if (activeTab() === 'entries') {
+    @if (loading()) {
+      <div class="skeleton-list">@for (i of [1,2,3,4,5]; track i) { <div class="skeleton-row"></div> }</div>
+    } @else if (entries().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📓</div>
+        <div class="empty-text">Nessuna voce per {{ monthLabel(selectedMonth()) }}</div>
+        <div class="empty-sub">Carica il CSV del tuo kakebo fisico oppure aggiungi voci manualmente</div>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <div class="table-header entry-cols">
+          <span>Data</span><span>Descrizione</span><span>Conto</span><span style="text-align:right">Importo</span><span>Stato</span>
+        </div>
+        @for (entry of entries(); track entry.id) {
+          <div class="table-row entry-cols">
+            <span class="col-date">{{ entry.date }}</span>
+            <div>
+              <div class="col-desc">{{ entry.description }}</div>
+              @if (entry.is_cash) { <span class="badge-cash">contanti</span> }
+              @if (entry.notes)   { <span class="col-note">{{ entry.notes }}</span> }
+            </div>
+            <span class="col-account">{{ entry.account_hint ?? '—' }}</span>
+            <span class="col-amount" [class.in]="entry.direction==='in'" [class.out]="entry.direction==='out'">
+              {{ entry.direction==='in' ? '+' : '−' }}{{ entry.amount | currency:'EUR':'symbol':'1.2-2':'it' }}
+            </span>
+            <div class="col-status">
+              <span class="status-dot" [style.background]="statusColor(entry.reconciliation_status)"></span>
+              <span class="status-label">{{ statusLabel(entry.reconciliation_status) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- TAB RICONCILIAZIONE -->
+  @if (activeTab() === 'reconcile') {
+    @if (!report()) {
+      <div class="empty-state">
+        <div class="empty-icon">⇄</div>
+        <div class="empty-text">Nessuna riconciliazione per questo mese</div>
+        <div class="empty-sub">Clicca "Riconcilia" per confrontare il kakebo con le transazioni bancarie</div>
+      </div>
+    } @else {
+      <!-- SUMMARY -->
+      <div class="recon-summary">
+        <div class="accuracy-circle">
+          <div class="accuracy-value">{{ report()!.summary.accuracy | number:'1.0-0' }}%</div>
+          <div class="accuracy-label">precisione</div>
+        </div>
+        <div class="recon-stats">
+          <div class="rstat"><div class="rstat-val green">{{ report()!.matched.length }}</div><div class="rstat-label">matchate</div></div>
+          <div class="rstat"><div class="rstat-val amber">{{ report()!.kakeboOnly.length }}</div><div class="rstat-label">solo kakebo</div></div>
+          <div class="rstat"><div class="rstat-val red">{{ report()!.bankOnly.length }}</div><div class="rstat-label">solo banca</div></div>
+          <div class="rstat"><div class="rstat-val">{{ report()!.summary.delta | currency:'EUR':'symbol':'1.2-2':'it' }}</div><div class="rstat-label">delta totale</div></div>
+        </div>
+      </div>
+
+      <!-- MATCHED -->
+      @if (report()!.matched.length > 0) {
+        <div class="section-title">Matchate ✓</div>
+        <div class="recon-list">
+          @for (m of report()!.matched; track m.kakeboEntry.id) {
+            <div class="recon-row" [class.fuzzy]="m.matchType === 'fuzzy'">
+              <div class="recon-left">
+                <div class="recon-desc">{{ m.kakeboEntry.description }}</div>
+                <div class="recon-meta">{{ m.kakeboEntry.date }} · kakebo</div>
+              </div>
+              <div class="recon-arrow">→</div>
+              <div class="recon-right">
+                <div class="recon-desc">{{ m.bankTransaction?.description }}</div>
+                <div class="recon-meta">{{ m.bankTransaction?.date }} · banca</div>
+              </div>
+              <div class="recon-badges">
+                @if (m.matchType === 'exact') { <span class="badge-exact">exact</span> }
+                @else { <span class="badge-fuzzy">fuzzy €{{ m.delta | number:'1.2-2' }}</span> }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- SOLO BANCA -->
+      @if (report()!.bankOnly.length > 0) {
+        <div class="section-title" style="margin-top:16px">Solo in banca — non nel kakebo ⚠</div>
+        <div class="recon-list">
+          @for (tx of report()!.bankOnly; track tx.id) {
+            <div class="recon-row miss">
+              <div class="recon-left">
+                <div class="recon-desc">{{ tx.description }}</div>
+                <div class="recon-meta">{{ tx.date }} · {{ tx.bank_name }}</div>
+              </div>
+              <span class="recon-amount out">−{{ tx.amount | currency:'EUR':'symbol':'1.2-2':'it' }}</span>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+
+  <!-- TAB STORICO -->
+  @if (activeTab() === 'history') {
+    @if (sessions().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🗂</div>
+        <div class="empty-text">Nessuna riconciliazione effettuata</div>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        @for (s of sessions(); track s.id) {
+          <div class="session-row">
+            <div class="session-month">{{ monthLabel(s.month) }}</div>
+            <div class="session-stats">
+              <span class="badge-green">{{ s.matched_count }} match</span>
+              @if (s.unmatched_bank > 0) { <span class="badge-red">{{ s.unmatched_bank }} mancanti</span> }
+            </div>
+            <div class="session-delta">Δ {{ s.discrepancy_sum | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+            <div class="session-date">{{ s.created_at | date:'dd/MM/yyyy' }}</div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>

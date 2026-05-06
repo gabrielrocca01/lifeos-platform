@@ -1,0 +1,26 @@
+/* Finance OS — Global styles */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background: #0f0f0f;
+  color: #e8e6e0;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0f0f0f; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #333; }

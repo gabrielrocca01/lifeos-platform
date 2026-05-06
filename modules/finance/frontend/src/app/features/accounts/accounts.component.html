@@ -1,0 +1,219 @@
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Conti</h1>
+      <p class="page-subtitle">{{ accounts().length }} conti attivi — architettura modulare</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" (click)="reload()" [disabled]="loading()">
+        <span [class.spinning]="loading()">↻</span> Aggiorna
+      </button>
+      <button class="btn btn-primary" (click)="openAddModal()">+ Nuovo conto</button>
+    </div>
+  </div>
+
+  <!-- TOTALE -->
+  <div class="patrimony-bar">
+    <div class="patrimony-label">Patrimonio totale</div>
+    <div class="patrimony-value">{{ totalBalance() | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+    <div class="patrimony-sub">Saldo calcolato dalle transazioni importate</div>
+  </div>
+
+  <!-- LOADING -->
+  @if (loading()) {
+    <div class="loading-grid">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="account-skeleton"></div>
+      }
+    </div>
+  }
+
+  <!-- ERRORE -->
+  @if (error() && !loading()) {
+    <div class="error-box">
+      <span class="error-icon">⚠</span>
+      <div>
+        <div class="error-title">Backend non raggiungibile</div>
+        <div class="error-sub">Assicurati che il server Node.js sia attivo su porta 3000</div>
+      </div>
+      <button class="btn btn-ghost" (click)="reload()">Riprova</button>
+    </div>
+  }
+
+  <!-- LISTA CONTI -->
+  @if (!loading() && !error()) {
+    <div class="accounts-grid">
+      @for (account of accounts(); track account.id; let i = $index) {
+        <div
+          class="account-card"
+          [class.selected]="selectedId() === account.id"
+          [style.--delay]="i * 60 + 'ms'"
+          (click)="select(account)"
+        >
+          <div class="account-stripe" [style.background]="account.color_tag"></div>
+          <div class="account-body">
+            <div class="account-top">
+              <div class="account-icon">{{ typeIcon(account.type) }}</div>
+              <div class="account-info">
+                <div class="account-name">{{ account.name }}</div>
+                <div class="account-bank">{{ account.bank_name }}</div>
+              </div>
+              <div class="account-menu">
+                <button class="icon-btn" (click)="openEditModal(account, $event)" title="Modifica">✎</button>
+                <button class="icon-btn danger" (click)="confirmDeactivate(account, $event)" title="Disattiva">✕</button>
+              </div>
+            </div>
+
+            <div class="account-balance">
+              <div class="balance-computed">{{ effectiveBalance(account) | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+              <div class="balance-label">
+                @if (account.transaction_count > 0) {
+                  saldo calcolato · {{ account.transaction_count }} transazioni
+                } @else {
+                  nessuna transazione importata
+                }
+              </div>
+            </div>
+
+            <div class="account-footer">
+              <span class="account-type-badge">{{ typeLabel(account.type) }}</span>
+              @if (account.iban) {
+                <span class="account-iban">{{ maskIban(account.iban) }}</span>
+              }
+              @if (account.notes) {
+                <span class="account-note" [title]="account.notes">ⓘ</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Card aggiungi -->
+      <div class="account-card account-add" (click)="openAddModal()">
+        <div class="add-icon">+</div>
+        <div class="add-label">Aggiungi conto</div>
+        <div class="add-sub">Wise, N26, o qualsiasi CSV</div>
+      </div>
+    </div>
+
+    <!-- DETTAGLIO -->
+    @if (selectedAccount()) {
+      <div class="account-detail">
+        <div class="detail-header">
+          <div class="detail-dot" [style.background]="selectedAccount()!.color_tag"></div>
+          <h2 class="detail-title">{{ selectedAccount()!.name }}</h2>
+          <button class="icon-btn" (click)="selectedId.set(null)">✕</button>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Banca</div>
+            <div class="detail-value">{{ selectedAccount()!.bank_name }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Tipo</div>
+            <div class="detail-value">{{ typeLabel(selectedAccount()!.type) }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Valuta</div>
+            <div class="detail-value">{{ selectedAccount()!.currency }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Transazioni</div>
+            <div class="detail-value">{{ selectedAccount()!.transaction_count }}</div>
+          </div>
+          @if (selectedAccount()!.iban) {
+            <div class="detail-item full-width">
+              <div class="detail-label">IBAN</div>
+              <div class="detail-value mono">{{ selectedAccount()!.iban }}</div>
+            </div>
+          }
+          @if (selectedAccount()!.notes) {
+            <div class="detail-item full-width">
+              <div class="detail-label">Note export CSV</div>
+              <div class="detail-value">{{ selectedAccount()!.notes }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <!-- MODAL AGGIUNGI / MODIFICA -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">{{ editingAccount() ? 'Modifica conto' : 'Nuovo conto' }}</h3>
+          <button class="icon-btn" (click)="closeModal()">✕</button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Nome conto *</label>
+            <input class="form-input" [(ngModel)]="form.name" placeholder="es. FinecoBank — Principale" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Banca *</label>
+            <input class="form-input" [(ngModel)]="form.bank_name" placeholder="es. FinecoBank" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo</label>
+            <select class="form-input" [(ngModel)]="form.type">
+              <option value="checking">Conto corrente</option>
+              <option value="savings">Conto risparmio</option>
+              <option value="credit_card">Carta di credito</option>
+              <option value="prepaid">Prepagata</option>
+              <option value="investment">Investimenti</option>
+              <option value="cash">Contante</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">IBAN</label>
+            <input class="form-input" [(ngModel)]="form.iban" placeholder="IT60 X054..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Colore</label>
+            <div class="color-picker">
+              @for (color of colorOptions; track color) {
+                <div class="color-dot" [style.background]="color"
+                  [class.selected]="form.color_tag === color"
+                  (click)="form.color_tag = color"></div>
+              }
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Note (istruzioni export CSV)</label>
+            <input class="form-input" [(ngModel)]="form.notes" placeholder="es. Home Banking → Movimenti → Esporta" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" (click)="closeModal()">Annulla</button>
+          <button class="btn btn-primary" (click)="saveAccount()" [disabled]="saving()">
+            {{ saving() ? 'Salvataggio...' : (editingAccount() ? 'Salva modifiche' : 'Crea conto') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL DISATTIVA -->
+  @if (showDeactivateModal()) {
+    <div class="modal-backdrop" (click)="showDeactivateModal.set(false)">
+      <div class="modal modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Disattiva conto</h3>
+        </div>
+        <p class="modal-body-text">
+          Vuoi disattivare <strong>{{ deactivatingAccount()?.name }}</strong>?<br>
+          I dati storici restano intatti per la fiscalità.
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" (click)="showDeactivateModal.set(false)">Annulla</button>
+          <button class="btn btn-danger" (click)="deactivateAccount()">Disattiva</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

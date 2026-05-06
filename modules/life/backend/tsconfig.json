@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "paths": {
+      "@lifeos/shared/types":     ["../../../packages/shared/src/types/index.ts"],
+      "@lifeos/shared/utils":     ["../../../packages/shared/src/utils/index.ts"],
+      "@lifeos/shared/constants": ["../../../packages/shared/src/constants/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

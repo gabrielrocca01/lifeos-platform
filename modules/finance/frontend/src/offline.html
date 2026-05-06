@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finance OS — Offline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0f0f; color: #e8e6e0;
+      font-family: 'DM Mono', monospace, system-ui;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 32px;
+    }
+    .card {
+      text-align: center; max-width: 340px;
+    }
+    .icon { font-size: 48px; margin-bottom: 20px; opacity: .4; }
+    .title {
+      font-family: Georgia, serif; font-size: 24px;
+      font-weight: 300; color: #e8c547; margin-bottom: 12px;
+    }
+    .text { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 24px; }
+    .btn {
+      background: #e8c547; color: #0f0f0f; border: none;
+      padding: 10px 24px; border-radius: 6px; font-size: 13px;
+      cursor: pointer; font-family: inherit;
+    }
+    .hint { font-size: 11px; color: #333; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">◈</div>
+    <div class="title">Finance OS</div>
+    <p class="text">
+      Sei offline oppure il backend non è raggiungibile.<br>
+      Assicurati di essere sulla stessa rete del laptop.
+    </p>
+    <button class="btn" onclick="location.reload()">Riprova</button>
+    <p class="hint">
+      Backend: assicurati che<br>
+      <code style="color:#e8c547">npm run dev</code> sia attivo sul laptop
+    </p>
+  </div>
+</body>
+</html>

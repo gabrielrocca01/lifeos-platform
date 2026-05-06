@@ -1,0 +1,52 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="logo">
+      <span class="logo-icon">💰</span>
+      <h1>Finance OS</h1>
+      <p>{{ 'AUTH.SUBTITLE' | translate }}</p>
+    </div>
+
+    <h2>{{ (mode() === 'login' ? 'AUTH.ACCEDI' : 'AUTH.REGISTRATI') | translate }}</h2>
+
+    @if (error()) {
+      <div class="error-banner">{{ error() }}</div>
+    }
+
+    <form (ngSubmit)="submit()" #f="ngForm">
+      @if (mode() === 'register') {
+        <div class="field">
+          <label for="name">{{ 'AUTH.NOME' | translate }}</label>
+          <input id="name" type="text" [(ngModel)]="name" name="name"
+                 [placeholder]="'AUTH.PLACEHOLDER_NOME' | translate"
+                 autocomplete="name" />
+        </div>
+      }
+
+      <div class="field">
+        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
+        <input id="email" type="email" [(ngModel)]="email" name="email"
+               [placeholder]="'AUTH.PLACEHOLDER_EMAIL' | translate"
+               required autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
+        <input id="password" type="password" [(ngModel)]="password" name="password"
+               [placeholder]="mode() === 'register' ? ('AUTH.MIN_8' | translate) : ''"
+               required autocomplete="current-password" />
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        @if (loading()) { {{ 'AUTH.LOADING' | translate }} }
+        @else { {{ (mode() === 'login' ? 'AUTH.ACCEDI' : 'AUTH.REGISTRATI') | translate }} }
+      </button>
+    </form>
+
+    <p class="toggle-mode">
+      {{ (mode() === 'login' ? 'AUTH.NON_HAI_ACCOUNT' : 'AUTH.HAI_ACCOUNT') | translate }}
+      <button type="button" (click)="toggleMode()">
+        {{ (mode() === 'login' ? 'AUTH.REGISTRATI' : 'AUTH.ACCEDI') | translate }}
+      </button>
+    </p>
+  </div>
+</div>

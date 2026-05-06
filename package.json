@@ -1,0 +1,21 @@
+{
+  "name": "lifeos-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/api-core",
+    "packages/shell",
+    "modules/finance/frontend",
+    "modules/finance/backend",
+    "modules/life/frontend",
+    "modules/life/backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,finance,shell -c cyan,green,yellow \"npm run dev --workspace=packages/api-core\" \"npm run dev:standalone --workspace=modules/finance/backend\" \"npm run dev --workspace=packages/shell\"",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

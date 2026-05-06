@@ -1,0 +1,177 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Spese pianificate</h1>
+      <p class="page-subtitle">Spese annuali grandi — rateizzate su Trade Republic</p>
+    </div>
+    <button class="btn btn-primary" (click)="openModal()">+ Aggiungi</button>
+  </div>
+
+  <!-- TOTALE MENSILE -->
+  @if (items().length > 0) {
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="summary-label">Accantonamento mensile totale</div>
+        <div class="summary-value amber">{{ totalMonthly() | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Spesa annuale totale</div>
+        <div class="summary-value">{{ totalAnnual() | currency:'EUR':'symbol':'1.2-2':'it' }}</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Voci attive</div>
+        <div class="summary-value">{{ items().length }}</div>
+      </div>
+    </div>
+  }
+
+  <!-- LOADING -->
+  @if (loading()) {
+    <div class="skeleton-list">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  }
+
+  <!-- LISTA -->
+  @if (!loading()) {
+    @if (items().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <div class="empty-text">Nessuna spesa pianificata</div>
+        <div class="empty-sub">Aggiungi bollo auto, assicurazione, abbonamenti annuali</div>
+        <button class="btn btn-primary" style="margin-top:16px" (click)="openModal()">+ Prima spesa</button>
+      </div>
+    } @else {
+      <div class="items-list">
+        @for (item of items(); track item.id; let i = $index) {
+          <div class="item-card" [style.--delay]="i * 50 + 'ms'">
+
+            <div class="item-main">
+              <div class="item-left">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-meta">
+                  Scadenza: <strong>{{ monthName(item.month_due) }}</strong>
+                  @if (item.account_name) { · {{ item.account_name }} }
+                  @if (item.is_deductible) {
+                    · <span class="deductible-badge">detraibile</span>
+                  }
+                </div>
+              </div>
+
+              <div class="item-amounts">
+                <div class="item-rate">{{ item.monthly_rate | currency:'EUR':'symbol':'1.2-2':'it' }}<span class="rate-label">/mese</span></div>
+                <div class="item-total">totale {{ item.total_amount | currency:'EUR':'symbol':'1.0-0':'it' }}</div>
+              </div>
+
+              <div class="item-actions">
+                <button class="icon-btn" (click)="openEditModal(item)" title="Modifica">✎</button>
+                <button class="icon-btn danger" (click)="confirmDelete(item)" title="Elimina">✕</button>
+              </div>
+            </div>
+
+            <!-- Barra di copertura -->
+            <div class="coverage-wrap">
+              <div class="coverage-bar">
+                <div
+                  class="coverage-fill"
+                  [style.width]="coveragePct(item.month_due) + '%'"
+                ></div>
+              </div>
+              <div class="coverage-label">
+                {{ monthsCovered(item.month_due) }}/12 mesi accantonati
+                ({{ coveragePct(item.month_due) | number:'1.0-0' }}%)
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- MODAL AGGIUNGI / MODIFICA -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">{{ editingItem() ? 'Modifica spesa' : 'Nuova spesa pianificata' }}</h3>
+          <button class="icon-btn" (click)="closeModal()">✕</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Nome *</label>
+            <input class="form-input" [(ngModel)]="form.name" placeholder="es. Assicurazione auto" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Importo totale (€) *</label>
+            <input class="form-input" type="number" [(ngModel)]="form.total_amount" placeholder="1020" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mese di addebito *</label>
+            <select class="form-input" [(ngModel)]="form.month_due">
+              @for (m of months; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Conto (solitamente Trade Republic)</label>
+            <select class="form-input" [(ngModel)]="form.account_id">
+              <option value="">— nessuno —</option>
+              @for (a of accounts(); track a.id) {
+                <option [value]="a.id">{{ a.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Note</label>
+            <input class="form-input" [(ngModel)]="form.notes" placeholder="es. Rinnovo annuale, polizza n. 12345" />
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label deductible-check">
+              <input type="checkbox" [(ngModel)]="form.is_deductible" style="margin-right: 8px" />
+              Spesa detraibile (730)
+            </label>
+          </div>
+        </div>
+
+        @if (form.total_amount > 0) {
+          <div class="modal-preview">
+            Rata mensile stimata:
+            <strong>{{ (form.total_amount / 12) | currency:'EUR':'symbol':'1.2-2':'it' }}/mese</strong>
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" (click)="closeModal()">Annulla</button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+            {{ saving() ? 'Salvataggio...' : (editingItem() ? 'Salva' : 'Aggiungi') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL CONFERMA ELIMINAZIONE -->
+  @if (showDeleteModal()) {
+    <div class="modal-backdrop" (click)="showDeleteModal.set(false)">
+      <div class="modal modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Elimina spesa</h3>
+        </div>
+        <p class="modal-body-text">
+          Elimina <strong>{{ deletingItem()?.name }}</strong>?
+        </p>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" (click)="showDeleteModal.set(false)">Annulla</button>
+          <button class="btn btn-danger" (click)="deleteItem()">Elimina</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

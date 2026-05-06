@@ -1,0 +1,100 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Cassetto fiscale</h1>
+      <p class="page-subtitle">Archivio documenti per anno fiscale</p>
+    </div>
+    <button class="btn btn-primary" (click)="openModal()">+ Aggiungi documento</button>
+  </div>
+
+  <!-- ANNO TABS -->
+  <div class="year-tabs">
+    @for (y of years; track y) {
+      <button class="year-tab" [class.active]="selectedYear() === y" (click)="changeYear(y)">{{ y }}</button>
+    }
+  </div>
+
+  <!-- COUNTER -->
+  @if (!loading()) {
+    <div class="doc-count">
+      {{ records().length }} {{ records().length === 1 ? 'documento' : 'documenti' }} per {{ selectedYear() }}
+    </div>
+  }
+
+  <!-- LOADING -->
+  @if (loading()) {
+    <div class="skeleton-list">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-row"></div> }
+    </div>
+
+  <!-- EMPTY -->
+  } @else if (records().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🗂</div>
+      <div class="empty-text">Nessun documento per {{ selectedYear() }}</div>
+      <div class="empty-sub">Aggiungi CU, 730, fatture, estratti conto e altri documenti fiscali</div>
+      <button class="btn btn-primary" style="margin-top:16px" (click)="openModal()">+ Primo documento</button>
+    </div>
+
+  <!-- LISTA -->
+  } @else {
+    <div class="docs-list">
+      @for (doc of records(); track doc.id) {
+        <div class="doc-card">
+          <div class="doc-icon-wrap">{{ docIcon(doc.document_type) }}</div>
+          <div class="doc-info">
+            <div class="doc-name">{{ docLabel(doc.document_type) }}</div>
+            @if (doc.filename) { <div class="doc-filename">{{ doc.filename }}</div> }
+            @if (doc.notes)    { <div class="doc-note">{{ doc.notes }}</div> }
+          </div>
+          <div class="doc-right">
+            <div class="doc-date">{{ doc.uploaded_at | date:'dd/MM/yy' }}</div>
+          </div>
+          <button class="icon-btn danger" (click)="deleteRecord(doc)" title="Elimina">✕</button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- MODAL -->
+  @if (showModal()) {
+    <div class="modal-backdrop" (click)="showModal.set(false)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Aggiungi documento — {{ selectedYear() }}</h3>
+          <button class="icon-btn" (click)="showModal.set(false)">✕</button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Tipo documento *</label>
+            <select class="form-input" [(ngModel)]="form.document_type">
+              @for (t of docTypes; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Nome file / riferimento</label>
+            <input class="form-input" [(ngModel)]="form.filename" placeholder="es. CU_2024_Mario_Rossi.pdf" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Anno fiscale</label>
+            <select class="form-input" [(ngModel)]="form.fiscal_year">
+              @for (y of years; track y) { <option [value]="y">{{ y }}</option> }
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note</label>
+            <input class="form-input" [(ngModel)]="form.notes" placeholder="Note opzionali" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" (click)="showModal.set(false)">Annulla</button>
+          <button class="btn btn-primary" (click)="saveRecord()" [disabled]="saving()">
+            {{ saving() ? 'Salvataggio...' : 'Registra' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,100 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'PROFILO.TITOLO' | translate }}</h1>
+      <p class="page-subtitle">{{ 'PROFILO.SOTTOTITOLO' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+
+    <!-- INFO ACCOUNT -->
+    <section class="card">
+      <h2 class="card-title">{{ 'PROFILO.ACCOUNT' | translate }}</h2>
+      <div class="info-row">
+        <span class="info-label">{{ 'PROFILO.EMAIL' | translate }}</span>
+        <span class="info-value">{{ user()?.email }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">{{ 'PROFILO.NOME' | translate }}</span>
+        <span class="info-value">{{ user()?.name || ('PROFILO.NESSUN_NOME' | translate) }}</span>
+      </div>
+      @if (createdAt()) {
+        <div class="info-row">
+          <span class="info-label">{{ 'PROFILO.ISCRITTO_DAL' | translate }}</span>
+          <span class="info-value">{{ formatDate(createdAt()!) }}</span>
+        </div>
+      }
+    </section>
+
+    <!-- CAMBIA NOME -->
+    <section class="card">
+      <h2 class="card-title">{{ 'PROFILO.CAMBIA_NOME' | translate }}</h2>
+      <p class="card-desc">{{ 'PROFILO.CAMBIA_NOME_DESC' | translate }}</p>
+      <form (ngSubmit)="saveName()" class="form-inline">
+        <input
+          type="text"
+          [(ngModel)]="newName"
+          name="newName"
+          [placeholder]="'PROFILO.PLACEHOLDER_NOME' | translate"
+          class="field-input"
+          maxlength="60"
+        />
+        <button type="submit" class="btn-save" [disabled]="savingName() || !newName.trim()">
+          {{ (savingName() ? 'PROFILO.SALVANDO' : 'PROFILO.SALVA') | translate }}
+        </button>
+      </form>
+    </section>
+
+    <!-- CAMBIA PASSWORD -->
+    <section class="card">
+      <h2 class="card-title">{{ 'PROFILO.CAMBIA_PASSWORD' | translate }}</h2>
+      <p class="card-desc">{{ 'PROFILO.CAMBIA_PASSWORD_DESC' | translate }}</p>
+      <form (ngSubmit)="savePassword()" class="form-stack">
+        <div class="field">
+          <label>{{ 'PROFILO.PWD_ATTUALE' | translate }}</label>
+          <input type="password" [(ngModel)]="currentPwd" name="currentPwd" autocomplete="current-password" />
+        </div>
+        <div class="field">
+          <label>{{ 'PROFILO.NUOVA_PWD' | translate }}</label>
+          <input type="password" [(ngModel)]="newPwd" name="newPwd"
+                 [placeholder]="'PROFILO.MIN_8' | translate"
+                 autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>{{ 'PROFILO.CONFERMA_PWD' | translate }}</label>
+          <input type="password" [(ngModel)]="confirmPwd" name="confirmPwd" autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn-save" [disabled]="savingPwd()">
+          {{ (savingPwd() ? 'PROFILO.AGGIORNANDO_PWD' : 'PROFILO.AGGIORNA_PWD') | translate }}
+        </button>
+      </form>
+    </section>
+
+    <!-- LINGUA -->
+    <section class="card">
+      <h2 class="card-title">{{ 'PROFILO.LINGUA' | translate }}</h2>
+      <div class="lang-grid">
+        @for (l of langs; track l.code) {
+          <button
+            class="lang-btn"
+            [class.active]="lang.current === l.code"
+            (click)="setLang(l.code)"
+          >
+            <span class="lang-flag">{{ l.flag }}</span>
+            <span class="lang-label">{{ l.label }}</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    <!-- SESSIONE -->
+    <section class="card">
+      <h2 class="card-title">{{ 'PROFILO.SESSIONE' | translate }}</h2>
+      <p class="card-desc">{{ 'PROFILO.SESSIONE_DESC' | translate }}</p>
+      <button class="btn-logout" (click)="logout()">{{ 'PROFILO.ESCI' | translate }}</button>
+    </section>
+
+  </div>
+</div>
