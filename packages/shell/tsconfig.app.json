@@ -1,0 +1,29 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": [],
+    "paths": {
+      "@angular/core":             ["./node_modules/@angular/core/index.d.ts"],
+      "@angular/core/*":           ["./node_modules/@angular/core/*"],
+      "@angular/common":           ["./node_modules/@angular/common/index.d.ts"],
+      "@angular/common/*":         ["./node_modules/@angular/common/*"],
+      "@angular/router":           ["./node_modules/@angular/router/index.d.ts"],
+      "@angular/router/*":         ["./node_modules/@angular/router/*"],
+      "@angular/forms":            ["./node_modules/@angular/forms/index.d.ts"],
+      "@angular/forms/*":          ["./node_modules/@angular/forms/*"],
+      "@angular/platform-browser": ["./node_modules/@angular/platform-browser/index.d.ts"],
+      "@angular/platform-browser/*": ["./node_modules/@angular/platform-browser/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../modules/finance/frontend/src/**/*.ts",
+    "../../modules/life/frontend/src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts"
+  ]
+}

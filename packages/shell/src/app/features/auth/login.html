@@ -1,0 +1,39 @@
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <span class="logo-mark">◈</span>
+      <span class="logo-text">LifeOS</span>
+    </div>
+
+    <div class="auth-tabs">
+      <button [class.active]="mode() === 'login'"    (click)="mode.set('login')">Accedi</button>
+      <button [class.active]="mode() === 'register'" (click)="mode.set('register')">Registrati</button>
+    </div>
+
+    @if (error()) {
+      <div class="auth-error">{{ error() }}</div>
+    }
+
+    <div class="auth-form">
+      @if (mode() === 'register') {
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="Mario" />
+        </div>
+      }
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" placeholder="mario@esempio.it" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" (click)="submit()" [disabled]="loading()">
+        {{ loading() ? 'Caricamento...' : (mode() === 'login' ? 'Accedi' : 'Registrati') }}
+      </button>
+    </div>
+
+  </div>
+</div>

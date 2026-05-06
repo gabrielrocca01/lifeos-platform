@@ -1,0 +1,47 @@
+<div class="platform">
+
+  <nav class="sidebar">
+    <div class="sidebar-top">
+      <a class="brand" routerLink="/">
+        <span class="brand-mark">◈</span>
+        <span class="brand-name">LifeOS</span>
+      </a>
+    </div>
+
+    <div class="sidebar-modules">
+      @for (mod of modules; track mod.id) {
+        <div class="module-group">
+          <div class="module-label">
+            <span class="module-icon" [style.color]="mod.color">{{ mod.icon }}</span>
+            {{ mod.label }}
+          </div>
+          @for (item of mod.navItems; track item.route) {
+            <a class="nav-item"
+               [routerLink]="item.route"
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="{ exact: item.route === mod.route }">
+              <span class="nav-icon">{{ item.icon }}</span>
+              {{ item.label }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="sidebar-bottom">
+      <a class="nav-item" routerLink="/settings" routerLinkActive="active">
+        <span class="nav-icon">⚙</span>
+        Impostazioni
+      </a>
+      <button class="nav-item logout" (click)="logout()">
+        <span class="nav-icon">→</span>
+        {{ user()?.name ?? user()?.email }}
+      </button>
+    </div>
+  </nav>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+
+</div>

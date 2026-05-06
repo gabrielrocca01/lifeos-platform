@@ -1,0 +1,19 @@
+<div class="dash">
+  <div class="dash-header">
+    <h1>Ciao, {{ user()?.name ?? 'Gabriel' }} 👋</h1>
+    <p class="dash-sub">Seleziona un modulo per iniziare</p>
+  </div>
+
+  <div class="modules-grid">
+    @for (mod of modules; track mod.id) {
+      <a class="module-card" [routerLink]="mod.route">
+        <div class="card-icon" [style.color]="mod.color">{{ mod.icon }}</div>
+        <div class="card-info">
+          <div class="card-title">{{ mod.label }}</div>
+          <div class="card-items">{{ mod.navItems.length }} sezioni</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </a>
+    }
+  </div>
+</div>

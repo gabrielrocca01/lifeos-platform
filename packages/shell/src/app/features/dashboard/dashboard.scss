@@ -1,0 +1,41 @@
+.dash {
+  padding: 48px 40px;
+  max-width: 800px;
+}
+
+.dash-header {
+  margin-bottom: 40px;
+
+  h1 { font-size: 28px; font-weight: 600; color: #fff; margin: 0 0 8px; }
+  .dash-sub { color: #555; font-size: 15px; margin: 0; }
+}
+
+.modules-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.module-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: #111;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #2a2a2a;
+    background: #141414;
+    transform: translateX(4px);
+  }
+
+  .card-icon { font-size: 28px; }
+  .card-info { flex: 1; }
+  .card-title { font-size: 16px; font-weight: 600; color: #fff; }
+  .card-items { font-size: 13px; color: #555; margin-top: 4px; }
+  .card-arrow { color: #333; font-size: 18px; }
+}
