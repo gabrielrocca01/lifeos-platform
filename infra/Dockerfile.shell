@@ -2,18 +2,22 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY packages/shell/package*.json ./
-RUN npm install
+# Installa dipendenze shell
+COPY packages/shell/package*.json ./packages/shell/
+RUN cd packages/shell && npm install
 
-COPY packages/shell .
+# Copia i moduli frontend (necessari per il lazy routing)
+COPY modules/finance/frontend ./modules/finance/frontend
+COPY modules/life/frontend ./modules/life/frontend
 
-# Sostituisce l'URL API con quello di produzione
-ARG API_URL=https://lifeos-platform-api.fly.dev
-RUN sed -i "s|http://localhost:3000|${API_URL}|g" proxy.conf.json 2>/dev/null || true
+# Copia la shell
+COPY packages/shell ./packages/shell
 
+# Build
+WORKDIR /app/packages/shell
 RUN npx ng build --configuration=production
 
 FROM nginx:alpine
-COPY --from=builder /app/dist/shell/browser /usr/share/nginx/html
+COPY --from=builder /app/packages/shell/dist/shell/browser /usr/share/nginx/html
 COPY infra/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
