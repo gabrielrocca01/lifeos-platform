@@ -11,9 +11,9 @@ COPY modules/finance/frontend/package*.json modules/finance/frontend/
 COPY modules/life/frontend/package*.json modules/life/frontend/
 
 # Installa dipendenze
-RUN cd packages/shell && npm install
-RUN cd modules/finance/frontend && npm install
-RUN cd modules/life/frontend && npm install
+RUN cd packages/shell && npm install --legacy-peer-deps
+RUN cd modules/finance/frontend && npm install --legacy-peer-deps
+RUN cd modules/life/frontend && npm install --legacy-peer-deps
 
 # Copia il codice sorgente
 COPY modules/finance/frontend modules/finance/frontend
