@@ -2,22 +2,23 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Installa dipendenze shell
-COPY packages/shell/package*.json ./packages/shell/
+# Crea le directory necessarie
+RUN mkdir -p packages/shell modules/finance/frontend modules/life/frontend
+
+# Copia i package.json
+COPY packages/shell/package*.json packages/shell/
+COPY modules/finance/frontend/package*.json modules/finance/frontend/
+COPY modules/life/frontend/package*.json modules/life/frontend/
+
+# Installa dipendenze
 RUN cd packages/shell && npm install
-
-# Installa dipendenze finance frontend
-COPY modules/finance/frontend/package*.json ./modules/finance/frontend/
 RUN cd modules/finance/frontend && npm install
-
-# Installa dipendenze life frontend
-COPY modules/life/frontend/package*.json ./modules/life/frontend/
 RUN cd modules/life/frontend && npm install
 
-# Copia tutto il codice sorgente
-COPY modules/finance/frontend ./modules/finance/frontend
-COPY modules/life/frontend ./modules/life/frontend
-COPY packages/shell ./packages/shell
+# Copia il codice sorgente
+COPY modules/finance/frontend modules/finance/frontend
+COPY modules/life/frontend modules/life/frontend
+COPY packages/shell packages/shell
 
 # Build produzione
 WORKDIR /app/packages/shell
