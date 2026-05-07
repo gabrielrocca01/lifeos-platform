@@ -6,14 +6,20 @@ WORKDIR /app
 COPY packages/shell/package*.json ./packages/shell/
 RUN cd packages/shell && npm install
 
-# Copia i moduli frontend (necessari per il lazy routing)
+# Installa dipendenze finance frontend
+COPY modules/finance/frontend/package*.json ./modules/finance/frontend/
+RUN cd modules/finance/frontend && npm install
+
+# Installa dipendenze life frontend
+COPY modules/life/frontend/package*.json ./modules/life/frontend/
+RUN cd modules/life/frontend && npm install
+
+# Copia tutto il codice sorgente
 COPY modules/finance/frontend ./modules/finance/frontend
 COPY modules/life/frontend ./modules/life/frontend
-
-# Copia la shell
 COPY packages/shell ./packages/shell
 
-# Build
+# Build produzione
 WORKDIR /app/packages/shell
 RUN npx ng build --configuration=production
 
