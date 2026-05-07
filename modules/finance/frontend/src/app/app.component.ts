@@ -1,20 +1,19 @@
 import { Component, computed } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
 import { NotificationService } from './core/services/notification.service';
 import { AuthService } from './core/services/auth.service';
 import { LanguageService } from './core/services/language.service';
 
 interface NavItem {
-  labelKey: string;
+  label: string;
   route: string;
-  sectionKey?: string;
+  section?: string;
 }
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslateModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <div class="app">
 
@@ -27,12 +26,12 @@ interface NavItem {
           </div>
 
           @for (item of navItems; track item.route) {
-            @if (item.sectionKey) {
-              <div class="nav-section">{{ item.sectionKey | translate }}</div>
+            @if (item.section) {
+              <div class="nav-section">{{ item.section }}</div>
             }
             <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
               <span class="nav-dot"></span>
-              {{ item.labelKey | translate }}
+              {{ item.label }}
             </a>
           }
 
@@ -40,7 +39,7 @@ interface NavItem {
             <div class="user-info">
               <span class="user-email">{{ auth.user()?.email }}</span>
             </div>
-            <button class="btn-logout" (click)="auth.logout()">{{ 'NAV.ESCI' | translate }}</button>
+            <button class="btn-logout" (click)="auth.logout()">Esci</button>
           </div>
         </nav>
       }
@@ -262,15 +261,15 @@ export class AppComponent {
   toasts = computed(() => this.notify.toasts());
 
   navItems: NavItem[] = [
-    { labelKey: 'NAV.DASHBOARD',    route: '/dashboard',    sectionKey: 'NAV.SEZIONE_PANORAMICA' },
-    { labelKey: 'NAV.CONTI',        route: '/conti' },
-    { labelKey: 'NAV.TRANSAZIONI',  route: '/transazioni',  sectionKey: 'NAV.SEZIONE_MOVIMENTI' },
-    { labelKey: 'NAV.IMPORT',       route: '/import' },
-    { labelKey: 'NAV.PIANIFICATE',  route: '/pianificate' },
-    { labelKey: 'NAV.KAKEBO',       route: '/kakebo',       sectionKey: 'NAV.SEZIONE_ANALISI' },
-    { labelKey: 'NAV.INVESTIMENTI', route: '/investimenti' },
-    { labelKey: 'NAV.FISCALITA',    route: '/fiscalita',    sectionKey: 'NAV.SEZIONE_FISCO' },
-    { labelKey: 'NAV.PROFILO',      route: '/profilo',      sectionKey: 'NAV.SEZIONE_ACCOUNT' },
+    { label: 'Dashboard',    route: '/dashboard',    section: 'Panoramica' },
+    { label: 'Conti',        route: '/conti' },
+    { label: 'Transazioni',  route: '/transazioni',  section: 'Movimenti' },
+    { label: 'Importa',      route: '/import' },
+    { label: 'Pianificate',  route: '/pianificate' },
+    { label: 'Kakebo',       route: '/kakebo',       section: 'Analisi' },
+    { label: 'Investimenti', route: '/investimenti' },
+    { label: 'Fiscalità',    route: '/fiscalita',    section: 'Fisco' },
+    { label: 'Profilo',      route: '/profilo',      section: 'Account' },
   ];
 
   constructor(public notify: NotificationService, public auth: AuthService, lang: LanguageService) {
