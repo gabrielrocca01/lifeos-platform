@@ -1,8 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-export const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
-export const JWT_EXPIRES_IN = '7d';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const header = req.headers.authorization;
@@ -11,8 +10,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return;
   }
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as jwt.JwtPayload;
-    (req as any).user = { id: payload['sub'], email: payload['email'] };
+    (req as any).user = jwt.verify(header.slice(7), JWT_SECRET);
     next();
   } catch {
     res.status(401).json({ ok: false, error: 'Token non valido o scaduto' });

@@ -46,6 +46,21 @@ export class AuthService {
 
   getToken() { return this._token(); }
 
+  updateToken(token: string) {
+    localStorage.setItem(TOKEN_KEY, token);
+    this._token.set(token);
+  }
+
+  updateProfile(data: { name?: string; password?: string; current_password?: string }) {
+    return this.http.patch<{ ok: boolean; data: { id: string; email: string; name: string | null } }>(
+      '/api/auth/me', data
+    ).pipe(
+      tap(res => {
+        if (res.ok) this._user.update(u => u ? { ...u, name: res.data.name ?? undefined } : u);
+      })
+    );
+  }
+
   private setSession({ token, user }: LoginResponse) {
     localStorage.setItem(TOKEN_KEY, token);
     this._token.set(token);

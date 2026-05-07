@@ -1,0 +1,19 @@
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package*.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/api-core/package.json ./packages/api-core/
+COPY modules/finance/backend/package.json ./modules/finance/backend/
+COPY modules/life/backend/package.json ./modules/life/backend/
+RUN npm install
+
+COPY packages/shared ./packages/shared
+COPY packages/api-core ./packages/api-core
+COPY modules/finance/backend ./modules/finance/backend
+COPY modules/life/backend ./modules/life/backend
+
+WORKDIR /app/packages/api-core
+RUN npm run build
+
+CMD ["node", "dist/index.js"]

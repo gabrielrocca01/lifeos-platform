@@ -31,7 +31,7 @@ export class ApiService {
         }
       });
     }
-    return this.http.get<ApiResponse<T>>(`/api${path}`, { params: httpParams }).pipe(
+    return this.http.get<ApiResponse<T>>(`/api/finance${path}`, { params: httpParams }).pipe(
       map(res => res.data as T)
     );
   }
@@ -45,28 +45,28 @@ export class ApiService {
         }
       });
     }
-    return this.http.get<ApiResponse<T>>(`/api${path}`, { params: httpParams });
+    return this.http.get<ApiResponse<T>>(`/api/finance${path}`, { params: httpParams });
   }
 
   post<T>(path: string, body: unknown): Observable<T> {
-    return this.http.post<ApiResponse<T>>(`/api${path}`, body).pipe(
+    return this.http.post<ApiResponse<T>>(`/api/finance${path}`, body).pipe(
       map(res => res.data as T)
     );
   }
 
   patch<T>(path: string, body: unknown): Observable<T> {
-    return this.http.patch<ApiResponse<T>>(`/api${path}`, body).pipe(
+    return this.http.patch<ApiResponse<T>>(`/api/finance${path}`, body).pipe(
       map(res => res.data as T)
     );
   }
 
   delete<T>(path: string): Observable<T> {
-    return this.http.delete<ApiResponse<T>>(`/api${path}`).pipe(
+    return this.http.delete<ApiResponse<T>>(`/api/finance${path}`).pipe(
       map(res => res.data as T)
     );
   }
 
   postFormData<T>(path: string, formData: FormData): Observable<ApiResponse<T>> {
-    return this.http.post<ApiResponse<T>>(`/api${path}`, formData);
+    return this.http.post<ApiResponse<T>>(`/api/finance${path}`, formData);
   }
 }

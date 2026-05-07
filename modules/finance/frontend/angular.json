@@ -50,8 +50,10 @@
             "production": { "buildTarget": "finance-os-frontend:build:production" },
             "development": { "buildTarget": "finance-os-frontend:build:development" }
           },
-          "defaultConfiguration": "development"
-        }
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          }
       }
     }
   },

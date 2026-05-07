@@ -5,6 +5,7 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { initDb } from './db/database.js';
+import { requireAuth } from './middleware/auth.middleware.js';
 import { accountsRouter }     from './routes/accounts.js';
 import { transactionsRouter } from './routes/transactions.js';
 import { importRouter }       from './routes/import.js';
@@ -24,6 +25,7 @@ db.pragma('foreign_keys = ON');
 initDb();
 
 export const router = express.Router();
+router.use(requireAuth);
 router.use('/accounts',     accountsRouter);
 router.use('/transactions', transactionsRouter);
 router.use('/import',       importRouter);

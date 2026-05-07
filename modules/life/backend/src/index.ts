@@ -4,6 +4,7 @@ import cors from 'cors';
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { requireAuth }    from './middleware/auth.middleware.js';
 import { habitsRouter }   from './routes/habits.js';
 import { goalsRouter }    from './routes/goals.js';
 import { ideasRouter }    from './routes/ideas.js';
@@ -75,6 +76,7 @@ db.exec(`
 `);
 
 export const router = express.Router();
+router.use(requireAuth);
 router.use('/habits',   habitsRouter);
 router.use('/goals',    goalsRouter);
 router.use('/ideas',    ideasRouter);

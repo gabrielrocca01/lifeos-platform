@@ -71,6 +71,16 @@ authRouter.post('/login', loginLimiter, (req: Request, res: Response) => {
   }
 });
 
+authRouter.post('/refresh', requireAuth, (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const token = jwt.sign({ sub: user.sub, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    return res.json({ ok: true, data: { token } });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: (e as Error).message });
+  }
+});
+
 authRouter.get('/me', requireAuth, (req: Request, res: Response) => {
   try {
     const user = db.prepare('SELECT id, email, name, created_at FROM users WHERE id = @id').get({ id: (req as any).user.sub });

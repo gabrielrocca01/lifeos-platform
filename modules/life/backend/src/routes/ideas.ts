@@ -4,7 +4,7 @@ import { db } from '../index.js';
 export const ideasRouter = Router();
 
 ideasRouter.get('/', (req, res) => {
-  const userId = (req as any).user?.sub;
+  const userId = (req as any).user.sub;
   const rows = db.prepare(
     'SELECT * FROM ideas WHERE user_id = ? ORDER BY pinned DESC, created_at DESC'
   ).all(userId);
@@ -12,7 +12,7 @@ ideasRouter.get('/', (req, res) => {
 });
 
 ideasRouter.post('/', (req, res) => {
-  const userId = (req as any).user?.sub;
+  const userId = (req as any).user.sub;
   const { content, tags = [], pinned = false } = req.body;
   if (!content) { res.status(400).json({ ok: false, error: 'content obbligatorio' }); return; }
   const row = db.prepare(
@@ -22,6 +22,7 @@ ideasRouter.post('/', (req, res) => {
 });
 
 ideasRouter.patch('/:id', (req, res) => {
+  const userId = (req as any).user.sub;
   const { content, tags, pinned } = req.body;
   db.prepare(`
     UPDATE ideas SET
@@ -31,13 +32,14 @@ ideasRouter.patch('/:id', (req, res) => {
     WHERE id = ? AND user_id = ?
   `).run(content ?? null, tags ? JSON.stringify(tags) : null,
          pinned !== undefined ? (pinned ? 1 : 0) : null,
-         req.params['id'], (req as any).user?.sub);
+         req.params['id'], userId);
   res.json({ ok: true });
 });
 
 ideasRouter.delete('/:id', (req, res) => {
+  const userId = (req as any).user.sub;
   db.prepare('DELETE FROM ideas WHERE id = ? AND user_id = ?')
-    .run(req.params['id'], (req as any).user?.sub);
+    .run(req.params['id'], userId);
   res.json({ ok: true });
 });
 
