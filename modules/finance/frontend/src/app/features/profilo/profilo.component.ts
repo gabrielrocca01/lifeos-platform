@@ -2,7 +2,6 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LanguageService, SUPPORTED_LANGS, Lang } from '../../core/services/language.service';
@@ -10,7 +9,7 @@ import { LanguageService, SUPPORTED_LANGS, Lang } from '../../core/services/lang
 @Component({
   selector: 'app-profilo',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './profilo.component.html',
   styleUrl: './profilo.component.css',
 })

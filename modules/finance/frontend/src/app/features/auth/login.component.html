@@ -3,10 +3,10 @@
     <div class="logo">
       <span class="logo-icon">💰</span>
       <h1>Finance OS</h1>
-      <p>{{ 'AUTH.SUBTITLE' | translate }}</p>
+      <p>Gestione finanziaria personale</p>
     </div>
 
-    <h2>{{ (mode() === 'login' ? 'AUTH.ACCEDI' : 'AUTH.REGISTRATI') | translate }}</h2>
+    <h2>{{ mode() === 'login' ? 'Accedi' : 'Registrati' }}</h2>
 
     @if (error()) {
       <div class="error-banner">{{ error() }}</div>
@@ -15,37 +15,37 @@
     <form (ngSubmit)="submit()" #f="ngForm">
       @if (mode() === 'register') {
         <div class="field">
-          <label for="name">{{ 'AUTH.NOME' | translate }}</label>
+          <label for="name">Nome (opzionale)</label>
           <input id="name" type="text" [(ngModel)]="name" name="name"
-                 [placeholder]="'AUTH.PLACEHOLDER_NOME' | translate"
+                 placeholder="Mario Rossi"
                  autocomplete="name" />
         </div>
       }
 
       <div class="field">
-        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
+        <label for="email">Email</label>
         <input id="email" type="email" [(ngModel)]="email" name="email"
-               [placeholder]="'AUTH.PLACEHOLDER_EMAIL' | translate"
+               placeholder="mario@esempio.it"
                required autocomplete="email" />
       </div>
 
       <div class="field">
-        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
+        <label for="password">Password</label>
         <input id="password" type="password" [(ngModel)]="password" name="password"
-               [placeholder]="mode() === 'register' ? ('AUTH.MIN_8' | translate) : ''"
+               [placeholder]="mode() === 'register' ? 'Almeno 8 caratteri' : ''"
                required autocomplete="current-password" />
       </div>
 
       <button type="submit" class="btn-primary" [disabled]="loading()">
-        @if (loading()) { {{ 'AUTH.LOADING' | translate }} }
-        @else { {{ (mode() === 'login' ? 'AUTH.ACCEDI' : 'AUTH.REGISTRATI') | translate }} }
+        @if (loading()) { Caricamento... }
+        @else { {{ mode() === 'login' ? 'Accedi' : 'Registrati' }} }
       </button>
     </form>
 
     <p class="toggle-mode">
-      {{ (mode() === 'login' ? 'AUTH.NON_HAI_ACCOUNT' : 'AUTH.HAI_ACCOUNT') | translate }}
+      {{ mode() === 'login' ? 'Non hai un account?' : 'Hai già un account?' }}
       <button type="button" (click)="toggleMode()">
-        {{ (mode() === 'login' ? 'AUTH.REGISTRATI' : 'AUTH.ACCEDI') | translate }}
+        {{ mode() === 'login' ? 'Registrati' : 'Accedi' }}
       </button>
     </p>
   </div>

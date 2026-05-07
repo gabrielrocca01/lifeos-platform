@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, computed, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { forkJoin } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
 import { AccountService, Account } from '../../core/services/account.service';
 import { TransactionService, MonthlyFlow } from '../../core/services/transaction.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -11,7 +10,7 @@ declare const Chart: any;
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, TranslateModule],
+  imports: [CommonModule, CurrencyPipe],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
