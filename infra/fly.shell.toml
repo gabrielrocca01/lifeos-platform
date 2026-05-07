@@ -2,7 +2,7 @@ app = 'lifeos-shell'
 primary_region = 'fra'
 
 [build]
-  dockerfile = 'infra/Dockerfile.shell'
+  dockerfile = 'Dockerfile.shell'
 
 [[services]]
   protocol = 'tcp'
